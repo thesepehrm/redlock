@@ -62,19 +62,16 @@ func main() {
 	logrus.Info("Waiting")
 
 	for {
-
 		err := mutex.Lock()
 		if err != nil {
+
 			time.Sleep(time.Second * 1)
 			continue
 		}
 		logrus.Info("Alright! It's my turn!")
-		if err != nil {
-			logrus.WithError(err).Error("Error extending lock")
-		}
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-		timer(ctx)
-		cancel()
+
+		someWork()
+
 		_, err = mutex.Unlock()
 		if err != nil {
 			logrus.WithError(err).Error("Error unlocking mutex")
@@ -83,7 +80,9 @@ func main() {
 	}
 }
 
-func timer(ctx context.Context) {
+func someWork() {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 	t := time.NewTicker(time.Second * 1)
 	defer t.Stop()
 
